@@ -1,13 +1,23 @@
 const gulp = require('gulp');
+//объединение файлов
 const concat = require("gulp-concat");
+// добавление префиксов
 const autoprefixer = require("gulp-autoprefixer");
+// оптимизация стилей
 const cleanCSS = require("gulp-clean-css");
+// оптимизация скриптов
 const uglify = require("gulp-uglify");
+// удаление файлов
 const del = require('del');
+// синхронизация с браузером
 const browserSync = require('browser-sync').create();
-
+// нужен для less
 const sourcemaps = require('gulp-sourcemaps');
+// подключение less
 const less = require('gulp-less');
+
+
+const imagemin = require('gulp-imagemin');
 //стили css
 /* const cssFiles = [
     './src/css/main.css',
@@ -49,12 +59,21 @@ function scripts(){
 function clean(){
     return del(['build/*'])
 }
+
+gulp.task('img-compress', ()=>{
+    return gulp.src('./src/img/**')
+    .pipe(imagemin({
+        progressive:true
+    }))
+    .pipe(gulp.dest('./build/img/'))
+})
 function watch(){
     browserSync.init({
         server: {
             baseDir: "./"
         }
     });
+    gulp.watch('./src/img/**', gulp.series('img-compress'))
     //обновление css файлов
     //gulp.watch('./src/css/**/*css styles)
     gulp.watch('./src/css/**/*less', styles)
@@ -72,3 +91,4 @@ gulp.task('del', clean);
 gulp.task('watch',watch);
 gulp.task('build', gulp.series(clean, gulp.parallel(styles,scripts)));
 gulp.task('dev', gulp.series('build','watch'));
+gulp.task('default', gulp.series('del', gulp.parallel('styles','scripts','img-compress'), 'watch'));
